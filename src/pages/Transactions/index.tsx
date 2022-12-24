@@ -1,5 +1,8 @@
+import { useContext, useEffect, useState } from "react";
 import { Header } from "../../components/Header";
 import { Summary } from "../../components/Summary";
+import { TransactionsContexts } from "../../contexts/TransactionsContext";
+import { dateFormatter, priceFormatter } from "../../utils/formatter";
 import { SearchForm } from "./components/SearchForm";
 import {
   PriceHighlight,
@@ -7,7 +10,17 @@ import {
   TransactionsTable,
 } from "./style";
 
+interface ITransactions {
+  id: number;
+  description: string;
+  type: "income" | "outcome";
+  price: number;
+  category: string;
+  createdAt: string;
+}
+
 export function Transactions() {
+  const { transactions } = useContext(TransactionsContexts);
   return (
     <div>
       <Header />
@@ -16,22 +29,23 @@ export function Transactions() {
         <SearchForm />
         <TransactionsTable>
           <tbody>
-            <tr>
-              <td width='50%'>Desenvolvimento de site</td>
-              <td>
-                <PriceHighlight variant='income'>R$ 12.000,00</PriceHighlight>
-              </td>
-              <td>Venda</td>
-              <td>13/04/2022</td>
-            </tr>
-            <tr>
-              <td width='50%'>Hambúrguer</td>
-              <td>
-                <PriceHighlight variant='outcome'>-R$ 59,00</PriceHighlight>
-              </td>
-              <td>Alimentação</td>
-              <td>10/04/2022</td>
-            </tr>
+            {transactions.map((transactions) => {
+              return (
+                <tr key={transactions.id}>
+                  <td width='50%'>{transactions.description}</td>
+                  <td>
+                    <PriceHighlight variant={transactions.type}>
+                      {transactions.type === "outcome" && "-"}
+                      {priceFormatter.format(transactions.price)}
+                    </PriceHighlight>
+                  </td>
+                  <td>{transactions.category}</td>
+                  <td>
+                    {dateFormatter.format(new Date(transactions.createdAt))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </TransactionsTable>
       </TransactionsContainer>
